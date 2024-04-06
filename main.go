@@ -24,6 +24,9 @@ var (
 
 	ServiceController      controllers.ServiceController
 	ServiceRouteController routes.ServiceRouteController
+
+	PointController      controllers.PointController
+	PointRouteController routes.PointRouteController
 )
 
 func init() {
@@ -45,6 +48,9 @@ func init() {
 
 	ServiceController = controllers.NewServiceController(initializers.DB)
 	ServiceRouteController = routes.NewRouteServiceController(ServiceController)
+
+	PointController = controllers.NewPointController(initializers.DB)
+	PointRouteController = routes.NewRoutePointController(PointController)
 
 	server = gin.Default()
 }
@@ -71,5 +77,6 @@ func main() {
 	UserRouteController.UserRoute(router)
 	PostRouteController.PostRoute(router)
 	ServiceRouteController.ServiceRoute(router)
+	PointRouteController.PointRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
 }
