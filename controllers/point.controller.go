@@ -98,7 +98,7 @@ func (pc *PointController) FindPointsByPhone(ctx *gin.Context) {
 	phone := ctx.Param("phone")
 
 	var page = ctx.DefaultQuery("page", "1")
-	var limit = ctx.DefaultQuery("limit", "100")
+	var limit = ctx.DefaultQuery("limit", "1000")
 
 	intPage, err := strconv.Atoi(page)
 	if err != nil {
@@ -126,7 +126,7 @@ func (pc *PointController) FindPointsByPhone(ctx *gin.Context) {
 
 func (pc *PointController) FindPoints(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
-	var limit = ctx.DefaultQuery("limit", "100")
+	var limit = ctx.DefaultQuery("limit", "1000")
 
 	intPage, _ := strconv.Atoi(page)
 	intLimit, _ := strconv.Atoi(limit)
