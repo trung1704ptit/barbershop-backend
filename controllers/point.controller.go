@@ -26,10 +26,18 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
+	var lastRecord *models.Point
+	lastRecordResult := pc.DB.Order("created_at desc").Where("phone = ?", payload.Phone).Last(&lastRecord)
+
+	if lastRecordResult.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": lastRecordResult.Error.Error()})
+		return
+	}
+
 	now := time.Now()
 	newPoint := models.Point{
 		Phone:       payload.Phone,
-		Points:      payload.Points,
+		Points:      lastRecord.Points + 10,
 		Description: payload.Description,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -107,7 +115,7 @@ func (pc *PointController) FindPointsByPhone(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var points []models.Point
-	results := pc.DB.Where("phone = ?", phone).Limit(intLimit).Offset(offset).Find(&points)
+	results := pc.DB.Order("created_at desc").Where("phone = ?", phone).Limit(intLimit).Offset(offset).Find(&points)
 
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})

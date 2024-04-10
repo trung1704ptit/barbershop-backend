@@ -17,7 +17,6 @@ type Point struct {
 
 type CreatePointRequest struct {
 	Phone       string    `gorm:"type:uuid;not null" json:"phone,omitempty"`
-	Points      int64     `json:"points,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
 	UpdatedAt   time.Time `json:"updated_at,omitempty"`
