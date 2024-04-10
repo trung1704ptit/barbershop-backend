@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/wpcodevo/golang-gorm-postgres/initializers"
-	"github.com/wpcodevo/golang-gorm-postgres/models"
+	"barbershop-backend/initializers"
+	"barbershop-backend/models"
 )
 
 func init() {

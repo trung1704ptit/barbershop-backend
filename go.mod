@@ -1,4 +1,4 @@
-module github.com/wpcodevo/golang-gorm-postgres
+module barbershop-backend
 
 go 1.18
 

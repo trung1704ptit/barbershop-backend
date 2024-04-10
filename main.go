@@ -4,11 +4,12 @@ import (
 	"log"
 	"net/http"
 
+	"barbershop-backend/controllers"
+	"barbershop-backend/initializers"
+	"barbershop-backend/routes"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"github.com/wpcodevo/golang-gorm-postgres/controllers"
-	"github.com/wpcodevo/golang-gorm-postgres/initializers"
-	"github.com/wpcodevo/golang-gorm-postgres/routes"
 )
 
 var (
