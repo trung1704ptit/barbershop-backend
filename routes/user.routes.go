@@ -20,4 +20,5 @@ func (uc *UserRouteController) UserRoute(rg *gin.RouterGroup) {
 	router := rg.Group("users")
 	router.GET("/me", middleware.DeserializeUser(), uc.userController.GetMe)
 	router.GET("/:phone", middleware.DeserializeUser(), uc.userController.GetUserByPhone)
+	router.PUT("/:userId", middleware.DeserializeUser(), uc.userController.UpdateUser)
 }

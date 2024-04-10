@@ -8,7 +8,7 @@ import (
 
 type Point struct {
 	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id,omitempty"`
-	UserID      uuid.UUID `gorm:"type:uuid;not null" json:"user_id,omitempty"`
+	Phone       string    `gorm:"type:varchar(10);not null" json:"phone,omitempty"`
 	Points      int64     `gorm:"type:int;not null" json:"points,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time `gorm:"not null" json:"created_at,omitempty"`
@@ -16,7 +16,7 @@ type Point struct {
 }
 
 type CreatePointRequest struct {
-	UserID      uuid.UUID `gorm:"type:uuid;not null" json:"user,omitempty"`
+	Phone       string    `gorm:"type:uuid;not null" json:"phone,omitempty"`
 	Points      int64     `json:"points,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`
@@ -24,7 +24,7 @@ type CreatePointRequest struct {
 }
 
 type UpdatePointRequest struct {
-	UserID      uuid.UUID `gorm:"type:uuid;not null" json:"user,omitempty"`
+	Phone       string    `gorm:"not null" json:"phone,omitempty"`
 	Points      int64     `json:"points,omitempty"`
 	Description string    `json:"description,omitempty"`
 	CreatedAt   time.Time `json:"created_at,omitempty"`

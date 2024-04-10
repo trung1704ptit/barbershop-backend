@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"time"
 
 	"barbershop-backend/models"
 
@@ -56,5 +57,47 @@ func (uc *UserController) GetUserByPhone(ctx *gin.Context) {
 		CreatedAt: user.CreatedAt,
 		UpdatedAt: user.UpdatedAt,
 	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
+}
+
+func (uc *UserController) UpdateUser(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+
+	var payload *models.UpdateUserRequest
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+	var updatedUser models.User
+	result := uc.DB.First(&updatedUser, "id = ?", userId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No point with that title exists"})
+		return
+	}
+	now := time.Now()
+	userToUpdate := models.User{
+		Name:      payload.Name,
+		Email:     payload.Email,
+		Phone:     payload.Phone,
+		Birthday:  payload.Birthday,
+		Role:      payload.Role,
+		Provider:  payload.Provider,
+		UpdatedAt: now,
+	}
+
+	userResponse := &models.UserResponse{
+		ID:        updatedUser.ID,
+		Name:      updatedUser.Name,
+		Email:     updatedUser.Email,
+		Photo:     updatedUser.Photo,
+		Phone:     updatedUser.Phone,
+		Birthday:  updatedUser.Birthday,
+		Role:      updatedUser.Role,
+		Provider:  updatedUser.Provider,
+		CreatedAt: updatedUser.CreatedAt,
+		UpdatedAt: updatedUser.UpdatedAt,
+	}
+
+	uc.DB.Model(&updatedUser).Updates(userToUpdate)
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
 }

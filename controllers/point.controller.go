@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"barbershop-backend/models"
@@ -27,7 +28,7 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 	}
 	now := time.Now()
 	newPoint := models.Point{
-		UserID:      payload.UserID,
+		Phone:       payload.Phone,
 		Points:      payload.Points,
 		Description: payload.Description,
 		CreatedAt:   now,
@@ -36,7 +37,11 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 
 	result := pc.DB.Create(&newPoint)
 	if result.Error != nil {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Point for that user already exists"})
+		if strings.Contains(result.Error.Error(), "value too long") {
+			ctx.JSON(http.StatusForbidden, gin.H{"status": "fail", "message": "Phone number cannot greater than 10 characters"})
+			return
+		}
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Cannot create new point for this phone number"})
 		return
 	}
 
@@ -59,7 +64,7 @@ func (pc *PointController) UpdatePoint(ctx *gin.Context) {
 	}
 	now := time.Now()
 	pointToUpdate := models.Point{
-		UserID:      payload.UserID,
+		Phone:       payload.Phone,
 		Points:      payload.Points,
 		Description: payload.Description,
 		CreatedAt:   now,
@@ -81,8 +86,9 @@ func (pc *PointController) FindPointById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": point})
 }
 
-func (pc *PointController) FindPointsByUserId(ctx *gin.Context) {
-	userId := ctx.Param("userId")
+func (pc *PointController) FindPointsByPhone(ctx *gin.Context) {
+	phone := ctx.Param("phone")
+
 	var page = ctx.DefaultQuery("page", "1")
 	var limit = ctx.DefaultQuery("limit", "100")
 
@@ -101,7 +107,7 @@ func (pc *PointController) FindPointsByUserId(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var points []models.Point
-	results := pc.DB.Where("user_id = ?", userId).Limit(intLimit).Offset(offset).Find(&points)
+	results := pc.DB.Where("phone = ?", phone).Limit(intLimit).Offset(offset).Find(&points)
 
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
