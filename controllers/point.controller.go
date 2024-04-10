@@ -27,7 +27,7 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 	}
 	now := time.Now()
 	newPoint := models.Point{
-		User:        payload.User,
+		UserID:      payload.UserID,
 		Points:      payload.Points,
 		Description: payload.Description,
 		CreatedAt:   now,
@@ -59,7 +59,7 @@ func (pc *PointController) UpdatePoint(ctx *gin.Context) {
 	}
 	now := time.Now()
 	pointToUpdate := models.Point{
-		User:        payload.User,
+		UserID:      payload.UserID,
 		Points:      payload.Points,
 		Description: payload.Description,
 		CreatedAt:   now,
@@ -81,9 +81,38 @@ func (pc *PointController) FindPointById(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": point})
 }
 
+func (pc *PointController) FindPointsByUserId(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+	var page = ctx.DefaultQuery("page", "1")
+	var limit = ctx.DefaultQuery("limit", "100")
+
+	intPage, err := strconv.Atoi(page)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid page parameter"})
+		return
+	}
+
+	intLimit, err := strconv.Atoi(limit)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid limit parameter"})
+		return
+	}
+
+	offset := (intPage - 1) * intLimit
+
+	var points []models.Point
+	results := pc.DB.Where("user_id = ?", userId).Limit(intLimit).Offset(offset).Find(&points)
+
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(points), "data": points})
+}
+
 func (pc *PointController) FindPoints(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
-	var limit = ctx.DefaultQuery("limit", "10")
+	var limit = ctx.DefaultQuery("limit", "100")
 
 	intPage, _ := strconv.Atoi(page)
 	intLimit, _ := strconv.Atoi(limit)
@@ -99,9 +128,21 @@ func (pc *PointController) FindPoints(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(points), "data": points})
 }
 
-func (pc *PointController) DeletePoint(ctx *gin.Context) {
+func (pc *PointController) DeleteOnePoint(ctx *gin.Context) {
 	pointId := ctx.Param("pointId")
 	result := pc.DB.Delete(&models.Point{}, "id = ?", pointId)
+
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Point not exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (pc *PointController) DeleteAllPointsByUserId(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+	result := pc.DB.Delete(&models.Point{}, "user = ?", userId)
 
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Point not exists"})
