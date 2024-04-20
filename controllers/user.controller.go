@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"net/http"
+	"strconv"
 	"time"
 
 	"barbershop-backend/models"
@@ -100,4 +101,59 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 
 	uc.DB.Model(&updatedUser).Updates(userToUpdate)
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
+}
+
+func (uc *UserController) FindUsers(ctx *gin.Context) {
+	var page = ctx.DefaultQuery("page", "1")
+	var limit = ctx.DefaultQuery("limit", "100")
+
+	intPage, err := strconv.Atoi(page)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid page parameter"})
+		return
+	}
+
+	intLimit, err := strconv.Atoi(limit)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid limit parameter"})
+		return
+	}
+
+	offset := (intPage - 1) * intLimit
+
+	var users []models.User
+	results := uc.DB.Limit(intLimit).Offset(offset).Find(&users)
+	var userResults []models.UserResponse
+
+	for _, user := range users {
+		userResults = append(userResults, models.UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			Photo:     user.Photo,
+			Phone:     user.Phone,
+			Birthday:  user.Birthday,
+			Role:      user.Role,
+			Provider:  user.Provider,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		})
+	}
+
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(userResults), "data": userResults})
+}
+
+func (uc *UserController) DeleteUser(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+	result := uc.DB.Delete(&models.User{}, "id = ?", userId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No User with that id exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 }
