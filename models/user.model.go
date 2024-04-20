@@ -54,8 +54,4 @@ type UpdateUserRequest struct {
 	Email    string    `gorm:"uniqueIndex;not null"`
 	Phone    string    `gorm:"uniqueIndex;not null"`
 	Birthday time.Time `gorm:"not null"`
-	Role     string    `gorm:"type:varchar(255);not null"`
-	Provider string    `gorm:"not null"`
-	Photo    string    `gorm:"not null"`
-	Verified bool      `gorm:"not null"`
 }

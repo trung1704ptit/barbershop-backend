@@ -3,6 +3,7 @@ package controllers
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"barbershop-backend/models"
@@ -72,17 +73,16 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 	var updatedUser models.User
 	result := uc.DB.First(&updatedUser, "id = ?", userId)
 	if result.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No point with that title exists"})
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Tài khoản user không tồn tại"})
 		return
 	}
+
 	now := time.Now()
 	userToUpdate := models.User{
 		Name:      payload.Name,
 		Email:     payload.Email,
 		Phone:     payload.Phone,
 		Birthday:  payload.Birthday,
-		Role:      payload.Role,
-		Provider:  payload.Provider,
 		UpdatedAt: now,
 	}
 
@@ -99,7 +99,17 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		UpdatedAt: updatedUser.UpdatedAt,
 	}
 
-	uc.DB.Model(&updatedUser).Updates(userToUpdate)
+	updateResult := uc.DB.Model(&updatedUser).Updates(userToUpdate)
+	if updateResult.Error != nil {
+		errorMsg := updateResult.Error.Error()
+		if strings.Contains(errorMsg, "duplicate key value") && strings.Contains(errorMsg, "idx_users_email") {
+			ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Địa chỉ email đã tồn tại."})
+			return
+		}
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": result.Error.Error()})
+		return
+	}
+
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
 }
 
