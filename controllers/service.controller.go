@@ -118,3 +118,37 @@ func (sc *ServiceController) DeleteService(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusNoContent, nil)
 }
+
+func (sc *ServiceController) RegisterUserWithServices(ctx *gin.Context) {
+	var payload *models.UserWithServicesRequest
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Parsing body failed"})
+		return
+	}
+
+	now := time.Now()
+	newUserService := models.UserService{
+		UserID:    payload.UserID,
+		ServiceID: payload.ServiceID,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	result := sc.DB.Create(&newUserService)
+	if result.Error != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": result.Error.Error()})
+		return
+	}
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newUserService})
+}
+
+func (sc *ServiceController) FindUserServices(ctx *gin.Context) {
+	var userServices []models.UserService
+
+	results := sc.DB.Limit(1000).Offset(0).Find(&userServices)
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(userServices), "data": userServices})
+}

@@ -132,7 +132,7 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var users []models.User
-	results := uc.DB.Limit(intLimit).Offset(offset).Find(&users)
+	results := uc.DB.Preload("Services").Preload("Points").Limit(intLimit).Offset(offset).Find(&users)
 	var userResults []models.UserResponse
 
 	for _, user := range users {
@@ -143,6 +143,8 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 			Photo:     user.Photo,
 			Phone:     user.Phone,
 			Birthday:  user.Birthday,
+			Services:  user.Services,
+			Points:    user.Points,
 			Role:      user.Role,
 			Provider:  user.Provider,
 			CreatedAt: user.CreatedAt,

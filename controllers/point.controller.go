@@ -3,7 +3,6 @@ package controllers
 import (
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"barbershop-backend/models"
@@ -27,17 +26,19 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 		return
 	}
 	var lastRecord *models.Point
-	lastRecordResult := pc.DB.Order("created_at desc").Where("phone = ?", payload.Phone).Last(&lastRecord)
+	var lastPoints int64
+	lastRecordResult := pc.DB.Order("created_at desc").Where("user_id = ?", payload.UserID).Last(&lastRecord)
 
 	if lastRecordResult.Error != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": lastRecordResult.Error.Error()})
-		return
+		lastPoints = 0
 	}
+
+	lastPoints = lastRecord.Points
 
 	now := time.Now()
 	newPoint := models.Point{
-		Phone:       payload.Phone,
-		Points:      lastRecord.Points + 10,
+		UserID:      payload.UserID,
+		Points:      lastPoints + 10,
 		Description: payload.Description,
 		CreatedAt:   now,
 		UpdatedAt:   now,
@@ -45,11 +46,7 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 
 	result := pc.DB.Create(&newPoint)
 	if result.Error != nil {
-		if strings.Contains(result.Error.Error(), "value too long") {
-			ctx.JSON(http.StatusForbidden, gin.H{"status": "fail", "message": "Phone number cannot greater than 10 characters"})
-			return
-		}
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": "Cannot create new point for this phone number"})
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": result.Error.Error()})
 		return
 	}
 
@@ -72,7 +69,7 @@ func (pc *PointController) UpdatePoint(ctx *gin.Context) {
 	}
 	now := time.Now()
 	pointToUpdate := models.Point{
-		Phone:       payload.Phone,
+		UserID:      payload.UserID,
 		Points:      payload.Points,
 		Description: payload.Description,
 		CreatedAt:   now,

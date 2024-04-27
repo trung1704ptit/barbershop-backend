@@ -15,6 +15,8 @@ type User struct {
 	Birthday  time.Time `gorm:"not null"`
 	Role      string    `gorm:"type:varchar(255);not null"`
 	Provider  string    `gorm:"not null"`
+	Services  []Service `gorm:"many2many:user_services;"`
+	Points    []Point   `json:"points,omitempty"`
 	Photo     string    `gorm:"not null"`
 	Verified  bool      `gorm:"not null"`
 	CreatedAt time.Time `gorm:"not null"`
@@ -42,6 +44,8 @@ type UserResponse struct {
 	Email     string    `json:"email,omitempty"`
 	Phone     string    `json:"phone,omitempty"`
 	Birthday  time.Time `json:"birthday,omitempty"`
+	Points    []Point   `json:"points,omitempty"`
+	Services  []Service `json:"services,omitempty"`
 	Role      string    `json:"role,omitempty"`
 	Photo     string    `json:"photo,omitempty"`
 	Provider  string    `json:"provider"`
