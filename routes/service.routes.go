@@ -20,6 +20,7 @@ func (sc *ServiceRouteController) ServiceRoute(rg *gin.RouterGroup) {
 	router.POST("/", middleware.DeserializeUser(), sc.serviceController.CreateService)
 	router.POST("/user-service", middleware.DeserializeUser(), sc.serviceController.RegisterUserWithServices)
 	router.GET("/user-service", middleware.DeserializeUser(), sc.serviceController.FindUserServices)
+	router.DELETE("/user-service/:userAndServiceId", middleware.DeserializeUser(), sc.serviceController.DeleteUserWithServices)
 	router.GET("/", sc.serviceController.FindServices)
 	router.GET("/:serviceId", sc.serviceController.FindServiceById)
 	router.PUT("/:serviceId", middleware.DeserializeUser(), sc.serviceController.UpdateService)

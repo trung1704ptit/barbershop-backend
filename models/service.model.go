@@ -12,7 +12,6 @@ type Service struct {
 	Image       string    `gorm:"type:varchar(255);not null" json:"image,omitempty"`
 	Price       float64   `json:"price,omitempty"`
 	PriceText   string    `json:"price_text,omitempty"`
-	Users       []User    `gorm:"many2many:user_services;" json:"users,omitempty"`
 	Description string    `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time `gorm:"not null" json:"created_at,omitempty"`
 	UpdatedAt   time.Time `gorm:"not null" json:"updated_at,omitempty"`
@@ -39,11 +38,12 @@ type UpdateService struct {
 }
 
 type UserService struct {
-	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id,omitempty"`
-	UserID    uuid.UUID `gorm:"type:uuid" json:"user_id,omitempty"`
-	ServiceID uuid.UUID `gorm:"type:uuid" json:"service_id,omitempty"`
-	CreatedAt time.Time `gorm:"not null" json:"created_at,omitempty"`
-	UpdatedAt time.Time `gorm:"not null" json:"updated_at,omitempty"`
+	ID              uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id,omitempty"`
+	UserID          uuid.UUID `gorm:"type:uuid" json:"user_id,omitempty"`
+	ServiceID       uuid.UUID `gorm:"type:uuid" json:"service_id,omitempty"`
+	CreatedAt       time.Time `gorm:"not null" json:"created_at,omitempty"`
+	UpdatedAt       time.Time `gorm:"not null" json:"updated_at,omitempty"`
+	UserIDServiceID string    `gorm:"uniqueIndex:user_id_service_id" json:"user_id_service_id,omitempty"`
 }
 
 type UserWithServicesRequest struct {

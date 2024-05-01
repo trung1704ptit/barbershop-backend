@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -128,10 +129,11 @@ func (sc *ServiceController) RegisterUserWithServices(ctx *gin.Context) {
 
 	now := time.Now()
 	newUserService := models.UserService{
-		UserID:    payload.UserID,
-		ServiceID: payload.ServiceID,
-		CreatedAt: now,
-		UpdatedAt: now,
+		UserID:          payload.UserID,
+		ServiceID:       payload.ServiceID,
+		CreatedAt:       now,
+		UpdatedAt:       now,
+		UserIDServiceID: payload.UserID.String() + "_" + payload.ServiceID.String(),
 	}
 
 	result := sc.DB.Create(&newUserService)
@@ -140,6 +142,18 @@ func (sc *ServiceController) RegisterUserWithServices(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newUserService})
+}
+
+func (sc *ServiceController) DeleteUserWithServices(ctx *gin.Context) {
+	userAndServiceId := ctx.Param("userAndServiceId")
+	fmt.Println("userAndServiceId:", userAndServiceId)
+	result := sc.DB.Delete(&models.UserService{}, "user_id_service_id = ?", userAndServiceId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No service with that name exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
 }
 
 func (sc *ServiceController) FindUserServices(ctx *gin.Context) {

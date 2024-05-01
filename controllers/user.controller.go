@@ -42,11 +42,13 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 func (uc *UserController) GetUserByPhone(ctx *gin.Context) {
 	phone := ctx.Param("phone")
 	var user models.User
-	result := uc.DB.First(&user, "phone = ?", phone)
+
+	result := uc.DB.Preload("Services").Preload("Points").First(&user, "phone = ?", phone)
 	if result.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "User not found"})
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Tài khoản không tồn tại"})
 		return
 	}
+
 	userResponse := &models.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
@@ -54,6 +56,8 @@ func (uc *UserController) GetUserByPhone(ctx *gin.Context) {
 		Photo:     user.Photo,
 		Phone:     user.Phone,
 		Birthday:  user.Birthday,
+		Points:    user.Points,
+		Services:  user.Services,
 		Role:      user.Role,
 		Provider:  user.Provider,
 		CreatedAt: user.CreatedAt,
