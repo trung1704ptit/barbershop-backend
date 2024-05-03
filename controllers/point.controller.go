@@ -31,9 +31,9 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 
 	if lastRecordResult.Error != nil {
 		lastPoints = 0
+	} else {
+		lastPoints = lastRecord.Points
 	}
-
-	lastPoints = lastRecord.Points
 
 	now := time.Now()
 	newPoint := models.Point{

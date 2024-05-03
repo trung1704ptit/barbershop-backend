@@ -121,7 +121,7 @@ func (sc *ServiceController) DeleteService(ctx *gin.Context) {
 }
 
 func (sc *ServiceController) RegisterUserWithServices(ctx *gin.Context) {
-	var payload *models.UserWithServicesRequest
+	var payload *models.UserServiceRequest
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Parsing body failed"})
 		return
@@ -142,6 +142,59 @@ func (sc *ServiceController) RegisterUserWithServices(ctx *gin.Context) {
 		return
 	}
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newUserService})
+}
+
+func (sc *ServiceController) AddServiceHistory(ctx *gin.Context) {
+	var payload *models.UserServiceRequest
+	if err := ctx.ShouldBindJSON(&payload); err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Parsing body failed"})
+		return
+	}
+	var lastRecord *models.ServiceHistory
+	var lastTimes int64
+
+	lastRecordResult := sc.DB.Order("created_at desc").Where("user_id = ? and service_id = ?", payload.UserID, payload.ServiceID).Last(&lastRecord)
+
+	if lastRecordResult.Error != nil {
+		lastTimes = 0
+	} else {
+		lastTimes = lastRecord.Times
+	}
+
+	now := time.Now()
+	newServiceHistory := models.ServiceHistory{
+		UserID:    payload.UserID,
+		ServiceID: payload.ServiceID,
+		Times:     lastTimes + 1,
+		CreatedAt: now,
+		UpdatedAt: now,
+	}
+
+	result := sc.DB.Create(&newServiceHistory)
+	if result.Error != nil {
+		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": result.Error.Error()})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newServiceHistory})
+}
+
+func (sc *ServiceController) GetServiceHistories(ctx *gin.Context) {
+	var page = ctx.DefaultQuery("page", "1")
+	var limit = ctx.DefaultQuery("limit", "100")
+
+	intPage, _ := strconv.Atoi(page)
+	intLimit, _ := strconv.Atoi(limit)
+	offset := (intPage - 1) * intLimit
+
+	var servicesHistory []models.ServiceHistory
+
+	results := sc.DB.Limit(intLimit).Offset(offset).Find(&servicesHistory)
+	if results.Error != nil {
+		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
+		return
+	}
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(servicesHistory), "data": servicesHistory})
 }
 
 func (sc *ServiceController) DeleteUserWithServices(ctx *gin.Context) {

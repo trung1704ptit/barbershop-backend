@@ -46,7 +46,18 @@ type UserService struct {
 	UserIDServiceID string    `gorm:"uniqueIndex:user_id_service_id" json:"user_id_service_id,omitempty"`
 }
 
-type UserWithServicesRequest struct {
+type UserServiceRequest struct {
 	UserID    uuid.UUID `gorm:"type:uuid" json:"user_id,omitempty"`
 	ServiceID uuid.UUID `gorm:"type:uuid" json:"service_id,omitempty"`
+}
+
+type ServiceHistory struct {
+	ID        uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primary_key" json:"id,omitempty"`
+	UserID    uuid.UUID `gorm:"type:uuid" json:"user_id,omitempty"`
+	ServiceID uuid.UUID `gorm:"type:uuid" json:"service_id,omitempty"`
+	Times     int64     `gorm:"not null" json:"times,omitempty"`
+	CreatedAt time.Time `gorm:"not null" json:"created_at,omitempty"`
+	UpdatedAt time.Time `gorm:"not null" json:"updated_at,omitempty"`
+	User      User      `gorm:"foreignkey:UserID" json:"-"`
+	Service   Service   `gorm:"foreignkey:ServiceID" json:"-"`
 }
