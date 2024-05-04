@@ -151,21 +151,21 @@ func (sc *ServiceController) AddServiceHistory(ctx *gin.Context) {
 		return
 	}
 	var lastRecord *models.ServiceHistory
-	var lastTimes int64
+	var lastCount int
 
 	lastRecordResult := sc.DB.Order("created_at desc").Where("user_id = ? and service_id = ?", payload.UserID, payload.ServiceID).Last(&lastRecord)
 
 	if lastRecordResult.Error != nil {
-		lastTimes = 0
+		lastCount = 0
 	} else {
-		lastTimes = lastRecord.Times
+		lastCount = lastRecord.Count
 	}
 
 	now := time.Now()
 	newServiceHistory := models.ServiceHistory{
 		UserID:    payload.UserID,
 		ServiceID: payload.ServiceID,
-		Times:     lastTimes + 1,
+		Count:     lastCount + 1,
 		CreatedAt: now,
 		UpdatedAt: now,
 	}

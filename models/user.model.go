@@ -16,8 +16,8 @@ type User struct {
 	Role            string           `gorm:"type:varchar(255);not null"`
 	Provider        string           `gorm:"not null"`
 	Services        []Service        `gorm:"many2many:user_services;" json:"services,omitempty"`
-	ServicesHistory []ServiceHistory `gorm:"foreignKey:UserID"`
-	Points          []Point          `json:"points,omitempty"`
+	ServicesHistory []ServiceHistory `gorm:"foreignKey:UserID;" json:"services_history,omitempty"`
+	Points          []Point          `gorm:"foreignKey:UserID;" json:"points,omitempty"`
 	Photo           string           `gorm:"not null"`
 	Verified        bool             `gorm:"not null"`
 	CreatedAt       time.Time        `gorm:"not null"`
