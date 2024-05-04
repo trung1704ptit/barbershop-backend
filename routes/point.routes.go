@@ -22,5 +22,5 @@ func (pc *PointRouteController) PointRoute(rg *gin.RouterGroup) {
 	router.GET("/", pc.pointController.FindPoints)
 	router.PUT("/:pointId", middleware.DeserializeUser(), pc.pointController.UpdatePoint)
 	router.DELETE("/:pointId", middleware.DeserializeUser(), pc.pointController.DeleteOnePoint)
-	router.DELETE("/user/:userId", middleware.DeserializeUser(), pc.pointController.DeleteAllPointsByUserId)
+	router.DELETE("/history/:userId", middleware.DeserializeUser(), pc.pointController.DeleteAllPointsByUserId)
 }

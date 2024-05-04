@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -199,8 +198,20 @@ func (sc *ServiceController) GetServiceHistories(ctx *gin.Context) {
 
 func (sc *ServiceController) DeleteUserWithServices(ctx *gin.Context) {
 	userAndServiceId := ctx.Param("userAndServiceId")
-	fmt.Println("userAndServiceId:", userAndServiceId)
+
 	result := sc.DB.Delete(&models.UserService{}, "user_id_service_id = ?", userAndServiceId)
+	if result.Error != nil {
+		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No service with that name exists"})
+		return
+	}
+
+	ctx.JSON(http.StatusNoContent, nil)
+}
+
+func (sc *ServiceController) DeleteServicesHistory(ctx *gin.Context) {
+	userId := ctx.Param("userId")
+
+	result := sc.DB.Delete(&models.ServiceHistory{}, "user_id = ?", userId)
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No service with that name exists"})
 		return

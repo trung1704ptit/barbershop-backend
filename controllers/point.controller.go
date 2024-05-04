@@ -153,7 +153,7 @@ func (pc *PointController) DeleteOnePoint(ctx *gin.Context) {
 
 func (pc *PointController) DeleteAllPointsByUserId(ctx *gin.Context) {
 	userId := ctx.Param("userId")
-	result := pc.DB.Delete(&models.Point{}, "user = ?", userId)
+	result := pc.DB.Delete(&models.Point{}, "user_id = ?", userId)
 
 	if result.Error != nil {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Point not exists"})
