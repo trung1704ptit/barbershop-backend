@@ -47,7 +47,7 @@ type UserResponse struct {
 	Birthday        time.Time        `json:"birthday,omitempty"`
 	Points          []Point          `json:"points,omitempty"`
 	Services        []Service        `json:"services,omitempty"`
-	ServicesHistory []ServiceHistory `json:"user_services_history"`
+	ServicesHistory []ServiceHistory `json:"services_history"`
 	Role            string           `json:"role,omitempty"`
 	Photo           string           `json:"photo,omitempty"`
 	Provider        string           `json:"provider"`
