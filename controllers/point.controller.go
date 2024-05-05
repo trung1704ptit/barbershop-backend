@@ -35,10 +35,18 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 		lastPoints = lastRecord.Points
 	}
 
+	var newPoints = lastPoints + 10
+
+	if lastPoints < payload.UsePoints {
+		newPoints = 0
+	} else {
+		newPoints = lastPoints - payload.UsePoints
+	}
+
 	now := time.Now()
 	newPoint := models.Point{
 		UserID:      payload.UserID,
-		Points:      lastPoints + 10,
+		Points:      newPoints,
 		Description: payload.Description,
 		CreatedAt:   now,
 		UpdatedAt:   now,
