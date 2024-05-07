@@ -3,9 +3,11 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"barbershop-backend/controllers"
 	"barbershop-backend/initializers"
+	"barbershop-backend/reminder"
 	"barbershop-backend/routes"
 
 	"github.com/gin-contrib/cors"
@@ -28,6 +30,9 @@ var (
 
 	PointController      controllers.PointController
 	PointRouteController routes.PointRouteController
+
+	RemindController      reminder.RemindController
+	RemindRouteController routes.RemindRouteController
 )
 
 func init() {
@@ -53,6 +58,9 @@ func init() {
 	PointController = controllers.NewPointController(initializers.DB)
 	PointRouteController = routes.NewRoutePointController(PointController)
 
+	RemindController = reminder.NewRemindController(initializers.DB, &UserController)
+	RemindRouteController = routes.NewRouteRemindController(RemindController)
+
 	server = gin.Default()
 }
 
@@ -77,7 +85,37 @@ func main() {
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	PostRouteController.PostRoute(router)
+	RemindRouteController.RemindRoute(router)
 	ServiceRouteController.ServiceRoute(router)
 	PointRouteController.PointRoute(router)
 	log.Fatal(server.Run(":" + config.ServerPort))
+
+	go sleepUntilNext10AM()
+
+	// Other code can continue executing here
+	// For example:
+	log.Println("This code will execute while waiting for 10 AM...")
+
+	// Block main goroutine to keep the program running
+	select {}
+}
+
+func sleepUntilNext10AM() {
+	startOfDay := time.Now().Truncate(24 * time.Hour)
+	desiredTime := startOfDay.Add(10 * time.Hour)
+
+	// Calculate the duration until the next 10 AM
+	durationUntilNext10AM := desiredTime.Sub(time.Now())
+	if durationUntilNext10AM < 0 {
+		durationUntilNext10AM += 24 * time.Hour
+	}
+
+	// Sleep until the next 10 AM
+	time.Sleep(durationUntilNext10AM)
+
+	// Start the loop to check and send birthday reminds every 24 hours at 10 AM
+	for {
+		RemindController.CheckAndSendBirthdayReminders()
+		time.Sleep(24 * time.Hour) // Check every 24 hours
+	}
 }

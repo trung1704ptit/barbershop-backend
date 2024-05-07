@@ -37,10 +37,12 @@ func (pc *PointController) CreatePoint(ctx *gin.Context) {
 
 	var newPoints = lastPoints + 10
 
-	if lastPoints < payload.UsePoints {
-		newPoints = 0
-	} else {
-		newPoints = lastPoints - payload.UsePoints
+	if payload.UsePoints > 0 {
+		if lastPoints < payload.UsePoints {
+			newPoints = 0
+		} else {
+			newPoints = lastPoints - payload.UsePoints
+		}
 	}
 
 	now := time.Now()

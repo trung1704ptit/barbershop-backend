@@ -176,3 +176,30 @@ func (uc *UserController) DeleteUser(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusNoContent, nil)
 }
+
+func (uc *UserController) GetAllUsers() ([]models.UserResponse, error) {
+	var users []models.User
+	results := uc.DB.Limit(10000).Find(&users)
+
+	if results.Error != nil {
+		return []models.UserResponse{}, results.Error
+	}
+
+	var userResults []models.UserResponse
+
+	for _, user := range users {
+		userResults = append(userResults, models.UserResponse{
+			ID:        user.ID,
+			Name:      user.Name,
+			Email:     user.Email,
+			Photo:     user.Photo,
+			Phone:     user.Phone,
+			Birthday:  user.Birthday,
+			Role:      user.Role,
+			Provider:  user.Provider,
+			CreatedAt: user.CreatedAt,
+			UpdatedAt: user.UpdatedAt,
+		})
+	}
+	return userResults, nil
+}

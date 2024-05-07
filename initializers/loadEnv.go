@@ -13,6 +13,8 @@ type Config struct {
 	DBName         string `mapstructure:"POSTGRES_DB"`
 	DBPort         string `mapstructure:"POSTGRES_PORT"`
 	ServerPort     string `mapstructure:"PORT"`
+	SenderEmail    string `mapstructure:"SENDER_EMAIL"`
+	SenderEmailKey string `mapstructure:"SENDER_EMAIL_KEY"`
 
 	ClientOrigin string `mapstructure:"CLIENT_ORIGIN"`
 
