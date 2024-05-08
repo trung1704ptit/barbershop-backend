@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
 
 	"barbershop-backend/controllers"
 	"barbershop-backend/initializers"
@@ -12,6 +11,7 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/robfig/cron/v3"
 )
 
 var (
@@ -88,34 +88,29 @@ func main() {
 	RemindRouteController.RemindRoute(router)
 	ServiceRouteController.ServiceRoute(router)
 	PointRouteController.PointRoute(router)
+
+	// Create a new cron job scheduler
+	c := cron.New()
+
+	// Schedule the email to be sent every day at 9:00 AM
+	_, cronError := c.AddFunc("0 8 * * *", sendEmail)
+	if cronError != nil {
+		log.Fatal("Error adding cron job:", cronError)
+	}
+
+	// Start the cron scheduler
+	c.Start()
+
 	log.Fatal(server.Run(":" + config.ServerPort))
 
-	go sleepUntilNext10AM()
-
-	// Other code can continue executing here
-	// For example:
-	log.Println("This code will execute while waiting for 10 AM...")
-
-	// Block main goroutine to keep the program running
+	// Keep the program running to allow cron jobs to execute
 	select {}
 }
 
-func sleepUntilNext10AM() {
-	startOfDay := time.Now().Truncate(24 * time.Hour)
-	desiredTime := startOfDay.Add(10 * time.Hour)
+func sendEmail() {
+	log.Println("Sending email...")
 
-	// Calculate the duration until the next 10 AM
-	durationUntilNext10AM := desiredTime.Sub(time.Now())
-	if durationUntilNext10AM < 0 {
-		durationUntilNext10AM += 24 * time.Hour
-	}
-
-	// Sleep until the next 10 AM
-	time.Sleep(durationUntilNext10AM)
-
-	// Start the loop to check and send birthday reminds every 24 hours at 10 AM
-	for {
-		RemindController.CheckAndSendBirthdayReminders()
-		time.Sleep(24 * time.Hour) // Check every 24 hours
-	}
+	// Send the email here
+	RemindController.CheckAndSendBirthdayReminders()
+	log.Println("Email sent!")
 }

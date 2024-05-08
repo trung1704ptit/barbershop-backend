@@ -28,7 +28,7 @@ func (rc *RemindController) CheckAndSendBirthdayReminders() {
 	uc := rc.UserController
 
 	users, err := uc.GetAllUsers()
-	fmt.Println(users)
+
 	if err != nil {
 		log.Printf("Error fetching user list from the database: %v\n", err)
 		return
@@ -42,7 +42,10 @@ func (rc *RemindController) CheckAndSendBirthdayReminders() {
 		birthday := user.Birthday.UTC()
 
 		// Calculate reminder date (5 days before birthday)
-		reminderDate := birthday.AddDate(0, 0, -5)
+		reminderDate := birthday.AddDate(0, 0, -5).UTC()
+
+		fmt.Println("birthday: year, month, day", birthday.Year(), birthday.Month(), birthday.Day())
+		fmt.Println("today: year, month, day", today.Year(), today.Month(), today.Day())
 
 		// Check if today's date matches the reminder date
 		if (today.Year() == reminderDate.Year() && today.Month() == reminderDate.Month() && today.Day() == reminderDate.Day()) ||
@@ -100,16 +103,11 @@ func SendBirthdayReminder(email string) error {
 	</body>
 	</html>
 	`
-	// message := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", senderEmail, email, subject, body)
-
 	// Authentication
 	auth := smtp.PlainAuth("", senderEmail, senderPassword, "smtp.gmail.com")
 
-	// Send email using Gmail's SMTP server
-	// err := smtp.SendMail("smtp.gmail.com:587", auth, senderEmail, []string{email}, []byte(message))
-
 	// Message content
-	message := fmt.Sprintf("From: %s\r\n", "roybarbershop.com") +
+	message := fmt.Sprintf("From: %s\r\n", "Roybarbershop <roybarbershop>") +
 		fmt.Sprintf("To: %s\r\n", email) +
 		fmt.Sprintf("Subject: %s\r\n", subject) +
 		"MIME-Version: 1.0\r\n" +
