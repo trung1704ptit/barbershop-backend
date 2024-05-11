@@ -1,7 +1,10 @@
 package controllers
 
 import (
+	"io"
 	"net/http"
+	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -9,6 +12,8 @@ import (
 	"barbershop-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/google/uuid"
+	"github.com/gosimple/slug"
 	"gorm.io/gorm"
 )
 
@@ -21,22 +26,90 @@ func NewProductController(DB *gorm.DB) ProductController {
 }
 
 func (pc *ProductController) CreateProduct(ctx *gin.Context) {
-	var payload *models.CreateProductRequest
-
-	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadRequest, err.Error())
+	err := ctx.Request.ParseMultipartForm(10 << 20) // Max file size 20MB
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Error parsing form data"})
 		return
+	}
+
+	title := ctx.PostForm("title")
+	description := ctx.PostForm("description")
+	priceStr := ctx.PostForm("price")
+	priceText := ctx.PostForm("price_text")
+
+	price, err := strconv.ParseFloat(priceStr, 64)
+
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Invalid price"})
+		return
+	}
+
+	previewImg, previewImgHeader, err := ctx.Request.FormFile("preview_image")
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"error": "Error retrieving preview image"})
+		return
+	}
+
+	defer previewImg.Close()
+
+	previewImgFilename := uuid.New().String() + filepath.Ext(previewImgHeader.Filename)
+	previewImgPath := filepath.Join("uploads", previewImgFilename)
+	previewImgFile, err := os.Create(previewImgPath)
+
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Error when save preview image"})
+		return
+	}
+
+	defer previewImgFile.Close()
+
+	_, err = io.Copy(previewImgFile, previewImg)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": "Error when save preview image"})
+		return
+	}
+
+	// Get the uploaded images (list of images)
+	images := ctx.Request.MultipartForm.File["images"]
+	imagePaths := make([]string, len(images))
+
+	for i, img := range images {
+		file, err := img.Open()
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error retrieving image"})
+			return
+		}
+		defer file.Close()
+
+		// Generate a unique filename for each uploaded image
+		imageFilename := uuid.New().String() + filepath.Ext(img.Filename)
+
+		// Save the image to a specified location on the server
+		imagePath := filepath.Join("uploads", imageFilename)
+		imageFile, err := os.Create(imagePath)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving image"})
+			return
+		}
+		defer imageFile.Close()
+		_, err = io.Copy(imageFile, file)
+		if err != nil {
+			ctx.JSON(http.StatusInternalServerError, gin.H{"error": "Error saving image"})
+			return
+		}
+
+		imagePaths[i] = imagePath
 	}
 
 	now := time.Now()
 	newProduct := models.Product{
-		Title:        payload.Title,
-		Slug:         payload.Slug,
-		Description:  payload.Description,
-		Price:        payload.Price,
-		PriceText:    payload.PriceText,
-		PreviewImage: payload.PreviewImage,
-		Images:       payload.Images,
+		Title:        title,
+		Slug:         slug.Make(title),
+		Description:  description,
+		Price:        price,
+		PriceText:    priceText,
+		PreviewImage: previewImgPath,
+		Images:       imagePaths,
 		CreatedAt:    now,
 		UpdatedAt:    now,
 	}
@@ -71,7 +144,7 @@ func (pc *ProductController) UpdateProduct(ctx *gin.Context) {
 	now := time.Now()
 	productToUpdate := models.Product{
 		Title:        payload.Title,
-		Slug:         payload.Slug,
+		Slug:         slug.Make(payload.Title),
 		Description:  payload.Description,
 		Price:        payload.Price,
 		PriceText:    payload.PriceText,
