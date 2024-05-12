@@ -33,6 +33,9 @@ var (
 
 	RemindController      reminder.RemindController
 	RemindRouteController routes.RemindRouteController
+
+	FileController      controllers.FileController
+	FileRouteController routes.FileRouteController
 )
 
 func init() {
@@ -61,7 +64,12 @@ func init() {
 	RemindController = reminder.NewRemindController(initializers.DB, &UserController)
 	RemindRouteController = routes.NewRouteRemindController(RemindController)
 
+	FileController = controllers.NewFileController(initializers.DB)
+	FileRouteController = routes.NewRouteFileController(FileController)
+
 	server = gin.Default()
+
+	server.MaxMultipartMemory = 100 << 20 // 50MB
 }
 
 func main() {
@@ -82,12 +90,15 @@ func main() {
 		ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": message})
 	})
 
+	router.Static("/uploads", "./uploads")
+
 	AuthRouteController.AuthRoute(router)
 	UserRouteController.UserRoute(router)
 	PostRouteController.PostRoute(router)
 	RemindRouteController.RemindRoute(router)
 	ServiceRouteController.ServiceRoute(router)
 	PointRouteController.PointRoute(router)
+	FileRouteController.FileRoute(router)
 
 	// Create a new cron job scheduler
 	c := cron.New()
