@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -85,14 +86,19 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Tài khoản user không tồn tại"})
 		return
 	}
+	fmt.Println("payload:", payload)
 
 	now := time.Now()
 	userToUpdate := models.User{
 		Name:      payload.Name,
 		Email:     payload.Email,
 		Phone:     payload.Phone,
+		Photo:     payload.Photo,
+		Roles:     payload.Roles,
+		Intro:     payload.Intro,
 		Birthday:  payload.Birthday,
 		UpdatedAt: now,
+		CreatedAt: updatedUser.CreatedAt,
 	}
 
 	userResponse := &models.UserResponse{
@@ -144,7 +150,7 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var users []models.User
-	results := uc.DB.Preload("Services").Preload("Points").Preload("ServicesHistory").Limit(intLimit).Offset(offset).Find(&users)
+	results := uc.DB.Preload("Services").Preload("Points").Preload("ServicesHistory").Limit(intLimit).Offset(offset).Order("updated_at DESC").Find(&users)
 	var userResults []models.UserResponse
 
 	for _, user := range users {

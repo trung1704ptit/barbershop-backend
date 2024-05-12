@@ -21,7 +21,7 @@ type User struct {
 	Services        []Service        `gorm:"many2many:user_services;" json:"services,omitempty"`
 	ServicesHistory []ServiceHistory `gorm:"foreignKey:UserID;" json:"services_history,omitempty"`
 	Points          []Point          `gorm:"foreignKey:UserID;" json:"points,omitempty"`
-	Photo           string           `gorm:"not null"`
+	Photo           string           `gorm:"force" json:"photo,omitempty"`
 	Verified        bool             `gorm:"not null"`
 	CreatedAt       time.Time        `gorm:"not null"`
 	UpdatedAt       time.Time        `gorm:"not null"`
@@ -34,7 +34,7 @@ type SignUpInput struct {
 	PasswordConfirm string         `json:"passwordConfirm" binding:"required"`
 	Phone           string         `json:"phone" binding:"required"`
 	Birthday        time.Time      `json:"birthday"`
-	Photo           string         `json:"photo"`
+	Photo           string         `gorm:"force" json:"photo,omitempty"`
 	Roles           pq.StringArray `gorm:"type:text[];not null" json:"roles" binding:"required"`
 	Position        string         `json:"position"`
 	Intro           string         `json:"intro"`
@@ -57,7 +57,7 @@ type UserResponse struct {
 	Services        []Service        `json:"services,omitempty"`
 	ServicesHistory []ServiceHistory `json:"services_history"`
 	Roles           pq.StringArray   `json:"roles,omitempty"`
-	Photo           string           `json:"photo,omitempty"`
+	Photo           string           `gorm:"force" json:"photo,omitempty"`
 	Provider        string           `json:"provider"`
 	CreatedAt       time.Time        `json:"created_at"`
 	UpdatedAt       time.Time        `json:"updated_at"`
@@ -71,5 +71,5 @@ type UpdateUserRequest struct {
 	Position string         `json:"position,omitempty"`
 	Intro    string         `json:"intro,omitempty"`
 	Roles    pq.StringArray `json:"roles,omitempty"`
-	Photo    string         `json:"photo,omitempty"`
+	Photo    string         `gorm:"force" json:"photo,omitempty"`
 }
