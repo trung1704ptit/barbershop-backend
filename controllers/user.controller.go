@@ -10,6 +10,7 @@ import (
 	"barbershop-backend/models"
 
 	"github.com/gin-gonic/gin"
+	"github.com/lib/pq"
 	"gorm.io/gorm"
 )
 
@@ -134,6 +135,8 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 func (uc *UserController) FindUsers(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
 	var limit = ctx.DefaultQuery("limit", "100")
+	var roles = ctx.DefaultQuery("role", "")
+	roleArray := pq.StringArray(strings.Split(roles, ","))
 
 	intPage, err := strconv.Atoi(page)
 	if err != nil {
@@ -150,7 +153,11 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var users []models.User
-	results := uc.DB.Preload("Services").Preload("Points").Preload("ServicesHistory").Limit(intLimit).Offset(offset).Order("updated_at DESC").Find(&users)
+	results := uc.DB.Preload("Services").Preload("Points").Preload("ServicesHistory").Limit(intLimit).Offset(offset).Order("updated_at DESC")
+	if len(roleArray) != 0 && roles != "" {
+		results = results.Where("roles @> ?", roleArray)
+	}
+	results = results.Find(&users)
 	var userResults []models.UserResponse
 
 	for _, user := range users {
