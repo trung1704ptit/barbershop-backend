@@ -15,7 +15,7 @@ type User struct {
 	Intro           string           `gorm:"type:varchar(255)" json:"intro,omitempty" `
 	Password        string           `gorm:"not null" json:"-"`
 	Phone           string           `gorm:"uniqueIndex;type:varchar(10);not null" json:"phone"`
-	Birthday        time.Time        `gorm:"not null" json:"birthday"`
+	Birthday        time.Time        `json:"birthday"`
 	Roles           pq.StringArray   `gorm:"type:text[];not null" json:"roles,omitempty"`
 	Provider        string           `gorm:"not null" json:"provider"`
 	Services        []Service        `gorm:"many2many:user_services;" json:"services,omitempty"`
@@ -29,7 +29,7 @@ type User struct {
 }
 
 type SignUpInput struct {
-	Name            string         `json:"name" binding:"required"`
+	Name            string         `json:"name;not null" binding:"required"`
 	Email           string         `json:"email"`
 	Password        string         `json:"password" binding:"required,min=8"`
 	PasswordConfirm string         `json:"passwordConfirm" binding:"required"`

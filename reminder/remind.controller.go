@@ -39,22 +39,26 @@ func (rc *RemindController) CheckAndSendBirthdayReminders() {
 
 	// Iterate through users and check for upcoming birthdays
 	for _, user := range users {
-		birthday := user.Birthday.UTC()
+		if !user.Birthday.IsZero() {
+			birthday := user.Birthday.UTC()
 
-		// Calculate reminder date (5 days before birthday)
-		reminderDate := birthday.AddDate(0, 0, -5).UTC()
+			// Calculate reminder date (5 days before birthday)
+			reminderDate := birthday.AddDate(0, 0, -5).UTC()
 
-		fmt.Println("birthday: year, month, day", birthday.Year(), birthday.Month(), birthday.Day())
-		fmt.Println("today: year, month, day", today.Year(), today.Month(), today.Day())
+			fmt.Println("birthday: year, month, day", birthday.Year(), birthday.Month(), birthday.Day())
+			fmt.Println("today: year, month, day", today.Year(), today.Month(), today.Day())
 
-		// Check if today's date matches the reminder date
-		if (today.Year() == reminderDate.Year() && today.Month() == reminderDate.Month() && today.Day() == reminderDate.Day()) ||
-			(birthday.Year() == today.Year() && birthday.Month() == today.Month() && birthday.Day() == today.Day()) {
-			// Send birthday reminder email
-			err := SendBirthdayReminder(user.Email)
-			if err != nil {
-				log.Printf("Error sending birthday reminder email to %s (%s): %v\n", user.Name, user.Email, err)
+			// Check if today's date matches the reminder date
+			if (today.Year() == reminderDate.Year() && today.Month() == reminderDate.Month() && today.Day() == reminderDate.Day()) ||
+				(birthday.Year() == today.Year() && birthday.Month() == today.Month() && birthday.Day() == today.Day()) {
+				// Send birthday reminder email
+				err := SendBirthdayReminder(user.Email)
+				if err != nil {
+					log.Printf("Error sending birthday reminder email to %s (%s): %v\n", user.Name, user.Email, err)
+				}
 			}
+		} else {
+			continue
 		}
 	}
 }
