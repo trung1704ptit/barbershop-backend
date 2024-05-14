@@ -25,7 +25,7 @@ func NewUserController(DB *gorm.DB) UserController {
 func (uc *UserController) GetMe(ctx *gin.Context) {
 	currentUser := ctx.MustGet("currentUser").(models.User)
 
-	userResponse := &models.UserResponse{
+	user := &models.User{
 		ID:        currentUser.ID,
 		Name:      currentUser.Name,
 		Email:     currentUser.Email,
@@ -40,7 +40,7 @@ func (uc *UserController) GetMe(ctx *gin.Context) {
 		UpdatedAt: currentUser.UpdatedAt,
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": userResponse}})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gin.H{"user": user}})
 }
 
 func (uc *UserController) GetUserByPhone(ctx *gin.Context) {
@@ -53,24 +53,7 @@ func (uc *UserController) GetUserByPhone(ctx *gin.Context) {
 		return
 	}
 
-	userResponse := &models.UserResponse{
-		ID:              user.ID,
-		Name:            user.Name,
-		Email:           user.Email,
-		Photo:           user.Photo,
-		Phone:           user.Phone,
-		Position:        user.Position,
-		Intro:           user.Intro,
-		Birthday:        user.Birthday,
-		Points:          user.Points,
-		Services:        user.Services,
-		ServicesHistory: user.ServicesHistory,
-		Roles:           user.Roles,
-		Provider:        user.Provider,
-		CreatedAt:       user.CreatedAt,
-		UpdatedAt:       user.UpdatedAt,
-	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": user})
 }
 
 func (uc *UserController) UpdateUser(ctx *gin.Context) {
@@ -102,22 +85,6 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		CreatedAt: updatedUser.CreatedAt,
 	}
 
-	userResponse := &models.UserResponse{
-		ID:              updatedUser.ID,
-		Name:            updatedUser.Name,
-		Email:           updatedUser.Email,
-		Photo:           updatedUser.Photo,
-		Phone:           updatedUser.Phone,
-		Position:        updatedUser.Position,
-		Intro:           updatedUser.Intro,
-		Birthday:        updatedUser.Birthday,
-		ServicesHistory: updatedUser.ServicesHistory,
-		Roles:           updatedUser.Roles,
-		Provider:        updatedUser.Provider,
-		CreatedAt:       updatedUser.CreatedAt,
-		UpdatedAt:       updatedUser.UpdatedAt,
-	}
-
 	updateResult := uc.DB.Model(&updatedUser).Updates(userToUpdate)
 	if updateResult.Error != nil {
 		errorMsg := updateResult.Error.Error()
@@ -129,7 +96,7 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": userResponse})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": updatedUser})
 }
 
 func (uc *UserController) FindUsers(ctx *gin.Context) {
@@ -158,33 +125,13 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 		results = results.Where("roles @> ?", roleArray)
 	}
 	results = results.Find(&users)
-	var userResults []models.UserResponse
-
-	for _, user := range users {
-		userResults = append(userResults, models.UserResponse{
-			ID:              user.ID,
-			Name:            user.Name,
-			Email:           user.Email,
-			Photo:           user.Photo,
-			Phone:           user.Phone,
-			Position:        user.Position,
-			Intro:           user.Intro,
-			Birthday:        user.Birthday,
-			Services:        user.Services,
-			Points:          user.Points,
-			ServicesHistory: user.ServicesHistory,
-			Roles:           user.Roles,
-			Provider:        user.Provider,
-			CreatedAt:       user.CreatedAt,
-			UpdatedAt:       user.UpdatedAt,
-		})
-	}
+	// var userResults []models.UserResponse
 
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
 		return
 	}
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(userResults), "data": userResults})
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(users), "data": users})
 }
 
 func (uc *UserController) DeleteUser(ctx *gin.Context) {
@@ -198,31 +145,12 @@ func (uc *UserController) DeleteUser(ctx *gin.Context) {
 	ctx.JSON(http.StatusNoContent, nil)
 }
 
-func (uc *UserController) GetAllUsers() ([]models.UserResponse, error) {
+func (uc *UserController) GetAllUsers() ([]models.User, error) {
 	var users []models.User
 	results := uc.DB.Limit(10000).Find(&users)
 
 	if results.Error != nil {
-		return []models.UserResponse{}, results.Error
+		return []models.User{}, results.Error
 	}
-
-	var userResults []models.UserResponse
-
-	for _, user := range users {
-		userResults = append(userResults, models.UserResponse{
-			ID:        user.ID,
-			Name:      user.Name,
-			Email:     user.Email,
-			Photo:     user.Photo,
-			Phone:     user.Phone,
-			Position:  user.Position,
-			Intro:     user.Intro,
-			Birthday:  user.Birthday,
-			Roles:     user.Roles,
-			Provider:  user.Provider,
-			CreatedAt: user.CreatedAt,
-			UpdatedAt: user.UpdatedAt,
-		})
-	}
-	return userResults, nil
+	return users, nil
 }

@@ -125,15 +125,11 @@ func SendBirthdayReminder(email string) error {
 
 func (rc *RemindController) AdminSendBirthdayReminder(ctx *gin.Context) {
 
-	var user *models.UserResponse
-
 	var payload *models.ReminderRequest
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
-
-	fmt.Println("user:", user)
 
 	err := SendBirthdayReminder(payload.Email)
 	if err != nil {

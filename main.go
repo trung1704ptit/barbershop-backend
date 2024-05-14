@@ -36,6 +36,9 @@ var (
 
 	FileController      controllers.FileController
 	FileRouteController routes.FileRouteController
+
+	BookingController      controllers.BookingController
+	BookingRouteController routes.BookingRouteController
 )
 
 func init() {
@@ -66,6 +69,9 @@ func init() {
 
 	FileController = controllers.NewFileController(initializers.DB)
 	FileRouteController = routes.NewRouteFileController(FileController)
+
+	BookingController = controllers.NewBookingController(initializers.DB)
+	BookingRouteController = routes.NewRouteBookingController(BookingController)
 
 	server = gin.Default()
 
@@ -99,6 +105,7 @@ func main() {
 	ServiceRouteController.ServiceRoute(router)
 	PointRouteController.PointRoute(router)
 	FileRouteController.FileRoute(router)
+	BookingRouteController.BookingRoute(router)
 
 	// Create a new cron job scheduler
 	c := cron.New()
