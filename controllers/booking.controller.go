@@ -19,28 +19,69 @@ func NewBookingController(DB *gorm.DB) BookingController {
 	return BookingController{DB}
 }
 
-func (pc *BookingController) CreateBooking(ctx *gin.Context) {
-	var payload *models.CreateBookingRequest
+func (bc *BookingController) CreateBooking(ctx *gin.Context) {
+	var payload models.CreateBookingRequest
+
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
-		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	// Check if the barber and guest exist
+	var barber models.User
+	var guest models.User
+	if err := bc.DB.First(&barber, "id = ?", payload.BarberID).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Barber not found"})
+		return
+	}
+	if err := bc.DB.First(&guest, "id = ?", payload.GuestID).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Guest not found"})
 		return
 	}
 
 	now := time.Now()
 	newBooking := models.Booking{
-		BarberID:  payload.BarberID,
-		GuestID:   payload.GuestID,
-		CreatedAt: now,
-		UpdatedAt: now,
+		BarberID:    payload.BarberID,
+		GuestID:     payload.GuestID,
+		Status:      "open",
+		BookingTime: payload.BookingTime,
+		CreatedAt:   now,
+		UpdatedAt:   now,
 	}
 
-	result := pc.DB.Create(&newBooking)
-	if result.Error != nil {
-		ctx.JSON(http.StatusConflict, gin.H{"status": "fail", "message": result.Error.Error()})
+	// Start a transaction
+	tx := bc.DB.Begin()
+
+	// Create the booking record
+	if err := tx.Create(&newBooking).Error; err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
 		return
 	}
 
-	pc.DB.Preload("Barber").Preload("Guest").First(&newBooking, "id = ?", newBooking.ID)
+	// Find the services
+	var services []models.Service
+	if err := tx.Where("id IN ?", payload.ServiceIDs).Find(&services).Error; err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": "Some services not found"})
+		return
+	}
+
+	// Associate the services with the booking
+	if err := tx.Model(&newBooking).Association("Services").Append(services); err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	// Preload the associated Barber and Services
+	if err := bc.DB.Preload("Barber").Preload("Guest").Preload("Services").First(&newBooking, "id = ?", newBooking.ID).Error; err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		return
+	}
 
 	ctx.JSON(http.StatusCreated, gin.H{"status": "success", "data": newBooking})
 }
@@ -54,7 +95,7 @@ func (pc *BookingController) FindBookings(ctx *gin.Context) {
 	offset := (intPage - 1) * intLimit
 
 	var bookings []models.Booking
-	results := pc.DB.Preload("Barber").Preload("Guest").Limit(intLimit).Offset(offset).Find(&bookings)
+	results := pc.DB.Preload("Barber").Preload("Guest").Preload("Services").Limit(intLimit).Offset(offset).Find(&bookings)
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "error", "message": results.Error})
 		return

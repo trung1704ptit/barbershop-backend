@@ -1,7 +1,6 @@
 package controllers
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -70,7 +69,6 @@ func (uc *UserController) UpdateUser(ctx *gin.Context) {
 		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Tài khoản user không tồn tại"})
 		return
 	}
-	fmt.Println("payload:", payload)
 
 	now := time.Now()
 	userToUpdate := models.User{

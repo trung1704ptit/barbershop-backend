@@ -15,12 +15,11 @@ type User struct {
 	Intro           string           `gorm:"type:varchar(255)" json:"intro,omitempty" `
 	Password        string           `gorm:"not null" json:"-"`
 	Phone           string           `gorm:"uniqueIndex;type:varchar(10);not null" json:"phone"`
-	Birthday        time.Time        `json:"birthday"`
+	Birthday        time.Time        `json:"birthday,omitempty"`
 	Roles           pq.StringArray   `gorm:"type:text[];not null" json:"roles,omitempty"`
 	Provider        string           `gorm:"not null" json:"provider"`
 	Services        []Service        `gorm:"many2many:user_services;" json:"services,omitempty"`
 	ServicesHistory []ServiceHistory `gorm:"foreignKey:UserID;" json:"services_history,omitempty"`
-	Bookings        []Booking        `gorm:"foreignKey:BarberID;" json:"bookings,omitempty"`
 	Points          []Point          `gorm:"foreignKey:UserID;" json:"points,omitempty"`
 	Photo           string           `gorm:"force" json:"photo,omitempty"`
 	Verified        bool             `gorm:"not null" json:"verified"`
@@ -29,12 +28,12 @@ type User struct {
 }
 
 type SignUpInput struct {
-	Name            string         `json:"name;not null" binding:"required"`
+	Name            string         `json:"name" binding:"required"`
 	Email           string         `json:"email"`
 	Password        string         `json:"password" binding:"required,min=8"`
 	PasswordConfirm string         `json:"passwordConfirm" binding:"required"`
 	Phone           string         `json:"phone" binding:"required"`
-	Birthday        time.Time      `json:"birthday"`
+	Birthday        time.Time      `json:"birthday,omitempty"`
 	Photo           string         `gorm:"force" json:"photo,omitempty"`
 	Roles           pq.StringArray `gorm:"type:text[];not null" json:"roles" binding:"required"`
 	Position        string         `json:"position"`
@@ -50,7 +49,7 @@ type UpdateUserRequest struct {
 	Name     string         `gorm:"type:varchar(255);not null"`
 	Email    string         `gorm:"uniqueIndex;not null"`
 	Phone    string         `gorm:"uniqueIndex;not null"`
-	Birthday time.Time      `gorm:"not null"`
+	Birthday time.Time      `json:"omitempty"`
 	Position string         `json:"position,omitempty"`
 	Intro    string         `json:"intro,omitempty"`
 	Roles    pq.StringArray `json:"roles,omitempty"`
