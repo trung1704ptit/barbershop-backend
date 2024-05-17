@@ -35,6 +35,8 @@ func (sc *ServiceController) CreateService(ctx *gin.Context) {
 		Price:       payload.Price,
 		PriceText:   payload.PriceText,
 		Description: payload.Description,
+		Todos:       payload.Todos,
+		Category:    payload.Category,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
