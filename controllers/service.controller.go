@@ -73,6 +73,8 @@ func (sc *ServiceController) UpdateService(ctx *gin.Context) {
 		Image:       payload.Image,
 		Price:       payload.Price,
 		PriceText:   payload.PriceText,
+		Todos:       payload.Todos,
+		Category:    payload.Category,
 		Description: payload.Description,
 		UpdatedAt:   now,
 		CreatedAt:   payload.CreatedAt,
