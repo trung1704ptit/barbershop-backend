@@ -15,10 +15,8 @@ func NewRouteGalleryController(galleryController controllers.GalleryController) 
 }
 
 func (fc *GalleryRouteController) GalleryRoute(rg *gin.RouterGroup) {
-	router := rg.Group("gallery")
+	router := rg.Group("galleries")
 	router.POST("/", fc.galleryController.CreateGallery)
 	router.GET("/", fc.galleryController.GetGalleries)
-	router.GET("/:id", fc.galleryController.GetGallery)
 	router.PUT("/:id", fc.galleryController.UpdateGallery)
-	router.DELETE("/:id", fc.galleryController.DeleteGallery)
 }

@@ -44,18 +44,6 @@ func (gc *GalleryController) GetGalleries(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": galleries})
 }
 
-// GetGallery retrieves a gallery item by ID
-func (gc *GalleryController) GetGallery(ctx *gin.Context) {
-	id := ctx.Param("id")
-	var gallery models.Gallery
-	if err := gc.DB.First(&gallery, "id = ?", id).Error; err != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "Gallery not found"})
-		return
-	}
-
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gallery})
-}
-
 // UpdateGallery updates a gallery item by ID
 func (gc *GalleryController) UpdateGallery(ctx *gin.Context) {
 	id := ctx.Param("id")
@@ -74,15 +62,4 @@ func (gc *GalleryController) UpdateGallery(ctx *gin.Context) {
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "data": gallery})
-}
-
-// DeleteGallery deletes a gallery item by ID
-func (gc *GalleryController) DeleteGallery(ctx *gin.Context) {
-	id := ctx.Param("id")
-	if err := gc.DB.Delete(&models.Gallery{}, "id = ?", id).Error; err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "fail", "message": err.Error()})
-		return
-	}
-
-	ctx.Status(http.StatusNoContent)
 }
