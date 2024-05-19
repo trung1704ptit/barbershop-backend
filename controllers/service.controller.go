@@ -37,6 +37,7 @@ func (sc *ServiceController) CreateService(ctx *gin.Context) {
 		Description: payload.Description,
 		Todos:       payload.Todos,
 		Category:    payload.Category,
+		ServiceType: payload.ServiceType,
 		CreatedAt:   now,
 		UpdatedAt:   now,
 	}
@@ -75,6 +76,7 @@ func (sc *ServiceController) UpdateService(ctx *gin.Context) {
 		PriceText:   payload.PriceText,
 		Todos:       payload.Todos,
 		Category:    payload.Category,
+		ServiceType: payload.ServiceType,
 		Description: payload.Description,
 		UpdatedAt:   now,
 		CreatedAt:   payload.CreatedAt,
@@ -97,6 +99,7 @@ func (sc *ServiceController) FindServiceById(ctx *gin.Context) {
 func (sc *ServiceController) FindServices(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
 	var limit = ctx.DefaultQuery("limit", "10")
+	var serviceType = ctx.DefaultQuery("service_type", "*")
 
 	intPage, _ := strconv.Atoi(page)
 	intLimit, _ := strconv.Atoi(limit)
@@ -104,7 +107,13 @@ func (sc *ServiceController) FindServices(ctx *gin.Context) {
 
 	var services []models.Service
 
-	results := sc.DB.Limit(intLimit).Offset(offset).Find(&services)
+	query := sc.DB.Limit(intLimit).Offset(offset)
+
+	if serviceType != "*" {
+		query = query.Where("service_type = ?", serviceType)
+	}
+
+	results := query.Find(&services)
 	if results.Error != nil {
 		ctx.JSON(http.StatusBadGateway, gin.H{"status": "fail", "message": results.Error})
 		return

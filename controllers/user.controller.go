@@ -132,15 +132,40 @@ func (uc *UserController) FindUsers(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "results": len(users), "data": users})
 }
 
-func (uc *UserController) DeleteUser(ctx *gin.Context) {
+func (bc *UserController) DeleteUser(ctx *gin.Context) {
 	userId := ctx.Param("userId")
-	result := uc.DB.Delete(&models.User{}, "id = ?", userId)
-	if result.Error != nil {
-		ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "No User with that id exists"})
+
+	var user models.User
+	if err := bc.DB.Preload("Services").First(&user, "id = ?", userId).Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			ctx.JSON(http.StatusNotFound, gin.H{"status": "fail", "message": "User not found"})
+		} else {
+			ctx.JSON(http.StatusBadRequest, gin.H{"status": "fail", "message": err.Error()})
+		}
 		return
 	}
 
-	ctx.JSON(http.StatusNoContent, nil)
+	// Start a transaction
+	tx := bc.DB.Begin()
+
+	// Remove the association with services
+	if err := tx.Model(&user).Association("Services").Clear(); err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not remove service associations"})
+		return
+	}
+
+	// Delete the user
+	if err := tx.Delete(&user).Error; err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not delete booking"})
+		return
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "User deleted successfully"})
 }
 
 func (uc *UserController) GetAllUsers() ([]models.User, error) {

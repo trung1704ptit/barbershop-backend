@@ -26,6 +26,15 @@ type CreateBookingRequest struct {
 	ServiceIDs  []uuid.UUID `json:"service_ids" binding:"required"`
 }
 
+type UpdateBookingRequest struct {
+	ID          uuid.UUID   `json:"id" binding:"required"`
+	BarberID    uuid.UUID   `json:"barber_id" binding:"required"`
+	GuestID     uuid.UUID   `json:"guest_id" binding:"required"`
+	Status      string      `json:"status" binding:"required"`
+	BookingTime time.Time   `json:"booking_time" binding:"required"`
+	ServiceIDs  []uuid.UUID `json:"service_ids" binding:"required"`
+}
+
 type BookingService struct {
 	BookingID uuid.UUID `gorm:"type:uuid" json:"booking_id,omitempty"`
 	ServiceID uuid.UUID `gorm:"type:uuid" json:"service_id,omitempty"`

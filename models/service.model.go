@@ -15,6 +15,7 @@ type Service struct {
 	PriceText   string         `json:"price_text,omitempty"`
 	Todos       pq.StringArray `gorm:"type:text[]" json:"todos,omitempty"`
 	Category    string         `gorm:"type:text" json:"category,omitempty"`
+	ServiceType string         `gorm:"type:text;default:'one_time'" json:"service_type,omitempty"`
 	Limit       int64          `json:"limit,omitempty"`
 	Description string         `gorm:"type:text" json:"description,omitempty"`
 	CreatedAt   time.Time      `gorm:"not null" json:"created_at,omitempty"`
@@ -29,6 +30,7 @@ type CreateServiceRequest struct {
 	Description string         `json:"description,omitempty"`
 	Todos       pq.StringArray `json:"todos,omitempty"`
 	Category    string         `gorm:"type:text" json:"category,omitempty"`
+	ServiceType string         `json:"service_type,omitempty"`
 	CreatedAt   time.Time      `json:"created_at,omitempty"`
 	UpdatedAt   time.Time      `json:"updated_at,omitempty"`
 }
@@ -41,6 +43,7 @@ type UpdateService struct {
 	Todos       pq.StringArray `json:"todos,omitempty"`
 	Category    string         `gorm:"type:text" json:"category,omitempty"`
 	Description string         `json:"description,omitempty"`
+	ServiceType string         `json:"service_type,omitempty"`
 	CreatedAt   time.Time      `json:"created_at,omitempty"`
 	UpdatedAt   time.Time      `json:"updated_at,omitempty"`
 }
