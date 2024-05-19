@@ -39,6 +39,9 @@ var (
 
 	BookingController      controllers.BookingController
 	BookingRouteController routes.BookingRouteController
+
+	GalleryController      controllers.GalleryController
+	GalleryRouteController routes.GalleryRouteController
 )
 
 func init() {
@@ -73,6 +76,9 @@ func init() {
 	BookingController = controllers.NewBookingController(initializers.DB)
 	BookingRouteController = routes.NewRouteBookingController(BookingController)
 
+	GalleryController = controllers.NewGalleryController(initializers.DB)
+	GalleryRouteController = routes.NewRouteGalleryController(GalleryController)
+
 	server = gin.Default()
 
 	server.MaxMultipartMemory = 100 << 20 // 50MB
@@ -106,6 +112,7 @@ func main() {
 	PointRouteController.PointRoute(router)
 	FileRouteController.FileRoute(router)
 	BookingRouteController.BookingRoute(router)
+	GalleryRouteController.GalleryRoute(router)
 
 	// Create a new cron job scheduler
 	c := cron.New()
