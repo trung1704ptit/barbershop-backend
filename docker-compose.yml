@@ -1,12 +1,40 @@
+version: '3.8'
 services:
-  postgres:
+  barber_db:
     image: postgres
     container_name: postgres
     ports:
-      - 5432:5432
+      - "5432:5432"
     env_file:
       - ./app.env
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - barber_app
+  barber_api:
+    container_name: barber_api
+    build: .
+    ports:
+      - 8000:8000
+    restart: always
+    volumes:
+      - barber_volumes:/usr/src/app/
+    depends_on:
+      - barber_db
+    networks:
+      - barber_app
+  migrate:
+    build: .
+    command: ["go", "run", "migrate/migrate.go"]
+    depends_on:
+      - barber_db
+    networks:
+      - barber_app
+
 volumes:
-  postgres:
+  pgdata:
+  barber_volumes:
+
+networks:
+  barber_app:
+    driver: bridge
