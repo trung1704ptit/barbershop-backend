@@ -23,13 +23,6 @@ services:
       - barber_db
     networks:
       - barber_app
-  migrate:
-    build: .
-    command: ["go", "run", "migrate/migrate.go"]
-    depends_on:
-      - barber_db
-    networks:
-      - barber_app
 
 volumes:
   pgdata:
