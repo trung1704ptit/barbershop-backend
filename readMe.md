@@ -147,3 +147,7 @@ This article will teach you how to create a CRUD RESTful API in a Golang environ
     - Delete a Record
 
 Read the entire article here: [https://codevoweb.com/build-restful-crud-api-with-golang](https://codevoweb.com/build-restful-crud-api-with-golang)
+
+
+If cannot delete posgres from docker, let check the volume
+docker volume ls
