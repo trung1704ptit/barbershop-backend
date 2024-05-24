@@ -91,7 +91,7 @@ func main() {
 	}
 
 	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:8000", "http://localhost:3000", "https://api.roybarbershop.com", "https://roybarbershop.com", config.ClientOrigin}
+	corsConfig.AllowOrigins = []string{"http://localhost:8000", "http://localhost:3000", "https://api.roybarbershop.com", "https://roybarbershop.com", "https://roybarbershop.com/", config.ClientOrigin}
 	corsConfig.AllowCredentials = true
 
 	server.Use(cors.New(corsConfig))
