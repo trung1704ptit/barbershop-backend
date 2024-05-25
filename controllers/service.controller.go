@@ -98,7 +98,7 @@ func (sc *ServiceController) FindServiceById(ctx *gin.Context) {
 
 func (sc *ServiceController) FindServices(ctx *gin.Context) {
 	var page = ctx.DefaultQuery("page", "1")
-	var limit = ctx.DefaultQuery("limit", "10")
+	var limit = ctx.DefaultQuery("limit", "1000")
 	var serviceType = ctx.DefaultQuery("service_type", "*")
 
 	intPage, _ := strconv.Atoi(page)
