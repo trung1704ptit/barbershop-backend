@@ -17,7 +17,7 @@ func NewRouteServiceController(serviceController controllers.ServiceController) 
 
 func (sc *ServiceRouteController) ServiceRoute(rg *gin.RouterGroup) {
 	router := rg.Group("services")
-	router.POST("/", middleware.DeserializeUser(), sc.serviceController.CreateService)
+	router.POST("", middleware.DeserializeUser(), sc.serviceController.CreateService)
 	router.POST("/user-service", middleware.DeserializeUser(), sc.serviceController.RegisterUserWithServices)
 	router.GET("/user-service", middleware.DeserializeUser(), sc.serviceController.FindUserServices)
 	router.DELETE("/user-service/:userAndServiceId", middleware.DeserializeUser(), sc.serviceController.DeleteUserWithServices)

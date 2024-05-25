@@ -155,7 +155,7 @@ func (ac *AuthController) RefreshAccessToken(ctx *gin.Context) {
 func (ac *AuthController) LogoutUser(ctx *gin.Context) {
 	ctx.SetCookie("access_token", "", -1, "/", "roybarbershop.com", false, true)
 	ctx.SetCookie("refresh_token", "", -1, "/", "roybarbershop.com", false, true)
-	ctx.SetCookie("logged_in", "", -1, "/", "roybarbershop.com", false, false)
+	ctx.SetCookie("logged_in", "", -1, "/", "roybarbershop.com", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success"})
 }
