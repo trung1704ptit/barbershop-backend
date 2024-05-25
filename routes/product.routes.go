@@ -20,7 +20,7 @@ func (pc *ProductRouteController) PostRoute(rg *gin.RouterGroup) {
 	router := rg.Group("products")
 	router.POST("", middleware.DeserializeUser(), pc.productController.CreateProduct)
 	router.GET("", pc.productController.FindProducts)
-	router.PUT("/:productId", middleware.DeserializeUser(), pc.productController.UpdateProduct)
-	router.GET("/:productId", pc.productController.FindProductById)
-	router.DELETE("/:productId", middleware.DeserializeUser(), pc.productController.DeleteProduct)
+	router.PUT(":productId", middleware.DeserializeUser(), pc.productController.UpdateProduct)
+	router.GET(":productId", pc.productController.FindProductById)
+	router.DELETE(":productId", middleware.DeserializeUser(), pc.productController.DeleteProduct)
 }

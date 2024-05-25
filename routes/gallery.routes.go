@@ -18,5 +18,5 @@ func (fc *GalleryRouteController) GalleryRoute(rg *gin.RouterGroup) {
 	router := rg.Group("galleries")
 	router.POST("", fc.galleryController.CreateGallery)
 	router.GET("", fc.galleryController.GetGalleries)
-	router.PUT("/:id", fc.galleryController.UpdateGallery)
+	router.PUT(":id", fc.galleryController.UpdateGallery)
 }
