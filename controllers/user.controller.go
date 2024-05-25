@@ -158,14 +158,14 @@ func (bc *UserController) DeleteUser(ctx *gin.Context) {
 	// Delete the user
 	if err := tx.Delete(&user).Error; err != nil {
 		tx.Rollback()
-		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not delete booking"})
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": err.Error()})
 		return
 	}
 
 	// Commit the transaction
 	tx.Commit()
 
-	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "User deleted successfully"})
+	ctx.JSON(http.StatusNoContent, gin.H{"status": "success", "message": "User deleted successfully"})
 }
 
 func (uc *UserController) GetAllUsers() ([]models.User, error) {

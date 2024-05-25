@@ -248,3 +248,38 @@ func (bc *BookingController) DeleteBooking(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Booking deleted successfully"})
 }
+func (bc *BookingController) DeleteBookingsByGuestID(ctx *gin.Context) {
+	guestID := ctx.Param("guestId")
+
+	// Start a transaction
+	tx := bc.DB.Begin()
+
+	// Find all bookings by guestID
+	var bookings []models.Booking
+	if err := tx.Preload("Services").Where("guest_id = ?", guestID).Find(&bookings).Error; err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not find bookings by guest ID"})
+		return
+	}
+
+	// Remove associations with services for each booking
+	for _, booking := range bookings {
+		if err := tx.Model(&booking).Association("Services").Clear(); err != nil {
+			tx.Rollback()
+			ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not remove service associations"})
+			return
+		}
+	}
+
+	// Delete all bookings by guestID
+	if err := tx.Where("guest_id = ?", guestID).Delete(&models.Booking{}).Error; err != nil {
+		tx.Rollback()
+		ctx.JSON(http.StatusInternalServerError, gin.H{"status": "error", "message": "Could not delete bookings"})
+		return
+	}
+
+	// Commit the transaction
+	tx.Commit()
+
+	ctx.JSON(http.StatusOK, gin.H{"status": "success", "message": "Bookings deleted successfully"})
+}

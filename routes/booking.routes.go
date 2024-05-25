@@ -22,4 +22,5 @@ func (bc *BookingRouteController) BookingRoute(rg *gin.RouterGroup) {
 	router.PUT(":bookingId", middleware.DeserializeUser(), bc.bookingController.UpdateBooking)
 	router.GET(":bookingId", bc.bookingController.FindBookingById)
 	router.DELETE(":bookingId", middleware.DeserializeUser(), bc.bookingController.DeleteBooking)
+	router.DELETE("guest/:guestId", middleware.DeserializeUser(), bc.bookingController.DeleteBookingsByGuestID)
 }
