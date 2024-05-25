@@ -97,10 +97,7 @@ func main() {
 		AllowHeaders:     []string{"Authorization", "Content-Type", "Origin", "X-Requested-With", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		AllowOriginFunc: func(origin string) bool {
-			return origin == "https://roybarbershop.com"
-		},
-		MaxAge: 12 * time.Hour,
+		MaxAge:           12 * time.Hour,
 	}
 
 	server.Use(cors.New(corsConfig))
