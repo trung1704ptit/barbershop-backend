@@ -92,7 +92,6 @@ func main() {
 	}
 
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"*"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Authorization", "Content-Type", "Origin", "X-Requested-With", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
