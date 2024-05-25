@@ -149,5 +149,9 @@ This article will teach you how to create a CRUD RESTful API in a Golang environ
 Read the entire article here: [https://codevoweb.com/build-restful-crud-api-with-golang](https://codevoweb.com/build-restful-crud-api-with-golang)
 
 
+# Docker commands
 If cannot delete posgres from docker, let check the volume
-docker volume ls
+- docker volume ls
+
+Delete all docker cache:
+- docker system prune -a
