@@ -24,7 +24,7 @@ func (sc *ServiceRouteController) ServiceRoute(rg *gin.RouterGroup) {
 	router.POST("/history", middleware.DeserializeUser(), sc.serviceController.AddServiceHistory)
 	router.GET("/history", middleware.DeserializeUser(), sc.serviceController.GetServiceHistories)
 	router.DELETE("/history/:userId", middleware.DeserializeUser(), sc.serviceController.DeleteServicesHistory)
-	router.GET("/", sc.serviceController.FindServices)
+	router.GET("", sc.serviceController.FindServices)
 	router.GET("/:serviceId", sc.serviceController.FindServiceById)
 	router.PUT("/:serviceId", middleware.DeserializeUser(), sc.serviceController.UpdateService)
 	router.DELETE("/:serviceId", middleware.DeserializeUser(), sc.serviceController.DeleteService)

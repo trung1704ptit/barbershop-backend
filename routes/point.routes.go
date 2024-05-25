@@ -17,7 +17,7 @@ func NewRoutePointController(pointController controllers.PointController) PointR
 
 func (pc *PointRouteController) PointRoute(rg *gin.RouterGroup) {
 	router := rg.Group("points")
-	router.POST("/", middleware.DeserializeUser(), pc.pointController.CreatePoint)
+	router.POST("", middleware.DeserializeUser(), pc.pointController.CreatePoint)
 	router.GET("/:phone", pc.pointController.FindPointsByPhone)
 	router.GET("/", pc.pointController.FindPoints)
 	router.PUT("/:pointId", middleware.DeserializeUser(), pc.pointController.UpdatePoint)
