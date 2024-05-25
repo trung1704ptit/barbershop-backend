@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	"barbershop-backend/controllers"
 	"barbershop-backend/initializers"
@@ -90,9 +91,17 @@ func main() {
 		log.Fatal("🚀 Could not load environment variables", err)
 	}
 
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:3000"}
-	corsConfig.AllowCredentials = true
+	corsConfig := cors.Config{
+		AllowOrigins:     []string{"https://roybarbershop.com, http://localhost:3000"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowHeaders:     []string{"Authorization", "Content-Type", "Origin", "X-Requested-With", "Accept"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		AllowOriginFunc: func(origin string) bool {
+			return origin == "https://roybarbershop.com"
+		},
+		MaxAge: 12 * time.Hour,
+	}
 
 	server.Use(cors.New(corsConfig))
 
