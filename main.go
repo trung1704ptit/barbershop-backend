@@ -92,7 +92,7 @@ func main() {
 	}
 
 	corsConfig := cors.Config{
-		AllowOrigins:     []string{"https://roybarbershop.com, http://localhost:3000"},
+		AllowOrigins:     []string{"http://localhost:3000"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Authorization", "Content-Type", "Origin", "X-Requested-With", "Accept"},
 		ExposeHeaders:    []string{"Content-Length"},
