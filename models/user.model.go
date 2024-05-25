@@ -49,7 +49,7 @@ type UpdateUserRequest struct {
 	Name     string         `gorm:"type:varchar(255);not null"`
 	Email    string         `gorm:"uniqueIndex;not null"`
 	Phone    string         `gorm:"uniqueIndex;not null"`
-	Birthday time.Time      `json:"omitempty"`
+	Birthday time.Time      `json:"birthday,omitempty"`
 	Position string         `json:"position,omitempty"`
 	Intro    string         `json:"intro,omitempty"`
 	Roles    pq.StringArray `json:"roles,omitempty"`
